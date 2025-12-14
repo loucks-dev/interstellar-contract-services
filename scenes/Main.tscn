@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://bmsde3r8kl1ag"]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="GameManager" type="Node" parent="."]
+
+[node name="SceneContainer" type="Node" parent="."]
+
+[node name="UIRoot" type="CanvasLayer" parent="."]
