@@ -1,3 +1,28 @@
-[gd_scene format=3 uid="uid://upc8ed66t3qt"]
+[gd_scene load_steps=7 format=4 uid="uid://upc8ed66t3qt"]
+
+[ext_resource type="Script" uid="uid://bkq67ka6v5gql" path="res://scenes/map.gd" id="1_xkm8s"]
+[ext_resource type="Texture2D" uid="uid://di0x2ldluyl1" path="res://data/sprites/floor-debug.png" id="2_tm3qm"]
+[ext_resource type="Texture2D" uid="uid://bmsvcyb40fy3l" path="res://data/sprites/wall-debug.png" id="3_yyirk"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_41ykk"]
+texture = ExtResource("2_tm3qm")
+0:0/0 = 0
+0:0/0/custom_data_0 = true
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_inly4"]
+texture = ExtResource("3_yyirk")
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_7ctrk"]
+custom_data_layer_0/name = "walkable"
+custom_data_layer_0/type = 1
+sources/0 = SubResource("TileSetAtlasSource_41ykk")
+sources/1 = SubResource("TileSetAtlasSource_inly4")
 
 [node name="Map" type="Node2D"]
+script = ExtResource("1_xkm8s")
+
+[node name="TileMapLayer" type="TileMapLayer" parent="."]
+position = Vector2(15, -5)
+tile_map_data = PackedByteArray("AAAoAA8AAQAAAAAAAAAnAA8AAQAAAAAAAAAmAA8AAQAAAAAAAAAlAA8AAQAAAAAAAAAkAA8AAQAAAAAAAAAjAA8AAQAAAAAAAAAiAA8AAQAAAAAAAAAiABAAAQAAAAAAAAAiABEAAQAAAAAAAAAiABIAAQAAAAAAAAAiABMAAQAAAAAAAAAiABQAAQAAAAAAAAAjABQAAQAAAAAAAAAkABQAAQAAAAAAAAAlABQAAQAAAAAAAAAmABQAAQAAAAAAAAAnABQAAQAAAAAAAAAoABQAAQAAAAAAAAAoABAAAQAAAAAAAAAoABEAAQAAAAAAAAAoABIAAQAAAAAAAAAoABMAAQAAAAAAAAAnABAAAAAAAAAAAAAmABAAAAAAAAAAAAAlABAAAAAAAAAAAAAkABAAAAAAAAAAAAAjABAAAAAAAAAAAAAjABEAAAAAAAAAAAAkABEAAAAAAAAAAAAlABEAAAAAAAAAAAAmABEAAAAAAAAAAAAnABEAAAAAAAAAAAAnABIAAAAAAAAAAAAmABIAAAAAAAAAAAAmABMAAAAAAAAAAAAlABMAAQAAAAAAAAAlABIAAAAAAAAAAAAkABIAAAAAAAAAAAAjABIAAAAAAAAAAAAjABMAAAAAAAAAAAAkABMAAAAAAAAAAAAnABMAAAAAAAAAAAA=")
+tile_set = SubResource("TileSet_7ctrk")
