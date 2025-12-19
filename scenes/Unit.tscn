@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3 uid="uid://b8ucbfko5ilq2"]
+
+[ext_resource type="Script" uid="uid://dkecl36qumstu" path="res://scenes/unit.gd" id="1_fqlnf"]
+[ext_resource type="Texture2D" uid="uid://byo35car1jkhm" path="res://data/sprites/debug-unit-friendly.png" id="2_aa524"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_w0fia"]
+
+[node name="Unit" type="Node2D"]
+script = ExtResource("1_fqlnf")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_aa524")
+
+[node name="HealthBar" type="TextureProgressBar" parent="."]
+offset_left = -19.0
+offset_top = -21.0
+offset_right = 21.0
+offset_bottom = 19.0
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_w0fia")
+
+[connection signal="input_event" from="Area2D" to="." method="_on_area_2d_input_event"]

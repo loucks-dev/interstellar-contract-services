@@ -35,7 +35,6 @@ func _input(event):
 
 		queue_redraw()
 
-
 func is_tile_walkable(tile_pos: Vector2i) -> bool:
 	var tile_data = tilemap.get_cell_tile_data(tile_pos)
 	if tile_data == null:
