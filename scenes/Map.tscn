@@ -30,4 +30,12 @@ tile_map_data = PackedByteArray("AAAYAAcAAQAAAAAAAAAXAAcAAQAAAAAAAAAWAAcAAQAAAAA
 tile_set = SubResource("TileSet_7ctrk")
 
 [node name="Unit" parent="." instance=ExtResource("4_tm3qm")]
-position = Vector2(135, 129)
+position = Vector2(135, 131)
+
+[node name="Unit2" parent="." instance=ExtResource("4_tm3qm")]
+position = Vector2(87, 83)
+
+[node name="Unit3" parent="." instance=ExtResource("4_tm3qm")]
+position = Vector2(87, 259)
+
+[connection signal="unit_selected" from="Unit" to="." method="_on_unit_unit_selected"]

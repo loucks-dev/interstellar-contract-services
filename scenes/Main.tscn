@@ -1,9 +1,18 @@
-[gd_scene format=3 uid="uid://bmsde3r8kl1ag"]
+[gd_scene load_steps=3 format=3 uid="uid://bmsde3r8kl1ag"]
+
+[ext_resource type="Script" uid="uid://epg4ygi32mxu" path="res://scenes/UnitManager.gd" id="1_elqb8"]
+[ext_resource type="PackedScene" uid="uid://upc8ed66t3qt" path="res://scenes/Map.tscn" id="2_rvslj"]
 
 [node name="Node2D" type="Node2D"]
 
 [node name="GameManager" type="Node" parent="."]
 
-[node name="SceneContainer" type="Node" parent="."]
+[node name="UnitManager" type="Node" parent="." groups=["unit_manager"]]
+script = ExtResource("1_elqb8")
 
 [node name="UIRoot" type="CanvasLayer" parent="."]
+
+[node name="SceneContainer" type="Node" parent="."]
+
+[node name="Map" parent="SceneContainer" instance=ExtResource("2_rvslj")]
+position = Vector2(1, 5)
