@@ -13,7 +13,7 @@ var action_points := max_action_points
 var is_alive := true
 var is_selected := false
 
-func _enter_tree():
+func _ready():
 	var unit_manager = get_tree().get_first_node_in_group("unit_manager")
 	if unit_manager:
 		unit_manager.register_unit(self)

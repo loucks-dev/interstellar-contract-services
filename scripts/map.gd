@@ -12,6 +12,7 @@ func tile_to_world(tile_pos: Vector2i) -> Vector2:
 	return tilemap.to_global(tilemap.map_to_local(tile_pos))
 
 # DEBUG - remove later
+# change for this: if unit_selected = true
 func _input(event):
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var world_pos = get_global_mouse_position()
