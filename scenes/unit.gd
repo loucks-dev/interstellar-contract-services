@@ -5,7 +5,7 @@ signal unit_selected(unit)
 signal unit_died(unit)
 
 @export var max_hp := 10
-@export var move_range := 5
+@export var move_range := 6
 @export var max_action_points := 2
 
 var current_hp := max_hp

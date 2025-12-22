@@ -20,7 +20,15 @@ func _on_unit_selected(unit):
 	active_unit = unit
 	active_unit.set_selected(true)
 	
+	var map = get_tree().get_first_node_in_group("map")
+	
+	if map:
+		var tile = map.world_to_tile(unit.global_position)
+		map.reachable_tiles = map.get_reachable_tiles(tile, unit.move_range)
+		map.queue_redraw()
+	else:
+		print("ERROR: MAP NOT FOUND")
+		
 	emit_signal("active_unit_changed", active_unit)
 	print("Active unit:", active_unit.name)
-	
 	
