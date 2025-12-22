@@ -4,9 +4,12 @@ extends Node2D
 signal unit_selected(unit)
 signal unit_died(unit)
 
+enum faction { PLAYER, ENEMY }
+
 @export var max_hp := 10
 @export var move_range := 6
 @export var max_action_points := 2
+@export var unit_faction: faction = faction.PLAYER
 
 var current_hp := max_hp
 var action_points := max_action_points

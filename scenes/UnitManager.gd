@@ -1,8 +1,9 @@
 extends Node
-
+@onready var turn_manager = get_tree().get_first_node_in_group("turn_manager")
 
 signal active_unit_changed(unit)
 
+@export var player_faction := "player"
 var units: Array = []
 var active_unit = null
 
@@ -11,12 +12,22 @@ func register_unit(unit):
 	units.append(unit)
 	unit.unit_selected.connect(_on_unit_selected)
 	
-func _on_unit_selected(unit):
+func _on_unit_selected(unit) -> void:
+	
+	if turn_manager == null:
+		push_error("TurnManager not found")
+		return
+	if turn_manager.current_phase != turn_manager.phase.PLAYER:
+		print("error: not player turn phase")
+		return
+	if unit.unit_faction != unit.faction.PLAYER:
+		print ("error: unit not in player faction")
+		return
 	if active_unit == unit:
+		print ("error: already selected")
 		return
 	if active_unit:
 		active_unit.set_selected(false)
-		
 	active_unit = unit
 	active_unit.set_selected(true)
 	

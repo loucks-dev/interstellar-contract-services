@@ -11,7 +11,7 @@
 [node name="UnitManager" type="Node" parent="." groups=["unit_manager"]]
 script = ExtResource("1_elqb8")
 
-[node name="TurnManager" type="Node" parent="."]
+[node name="TurnManager" type="Node" parent="." groups=["turn_manager"]]
 script = ExtResource("2_0bbpv")
 
 [node name="UIRoot" type="CanvasLayer" parent="."]

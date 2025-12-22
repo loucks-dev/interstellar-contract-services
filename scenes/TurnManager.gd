@@ -1,6 +1,6 @@
 extends Node
 
-enum phase { PLAYER, ENEMY}
+enum phase { PLAYER, ENEMY }
 
 signal turn_started(phase)
 signal turn_ended(phase)
@@ -13,6 +13,7 @@ func _ready():
 	var unit_manager = get_tree().get_first_node_in_group("unit_manager") # grab player units from UnitManager
 	if unit_manager:
 		player_units = unit_manager.units
+	
 
 
 func start_player_turn():
