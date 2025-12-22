@@ -15,7 +15,7 @@ func register_unit(unit):
 func _on_unit_selected(unit) -> void:
 	
 	if turn_manager == null:
-		push_error("TurnManager not found")
+		print("TurnManager not found")
 		return
 	if turn_manager.current_phase != turn_manager.phase.PLAYER:
 		print("error: not player turn phase")
@@ -43,3 +43,9 @@ func _on_unit_selected(unit) -> void:
 	emit_signal("active_unit_changed", active_unit)
 	print("Active unit:", active_unit.name)
 	
+func deselect_active_unit():
+	if active_unit:
+		active_unit.set_selected(false)
+		active_unit = null
+		emit_signal("active_unit_changed", null)
+		print("Active unit cleared")

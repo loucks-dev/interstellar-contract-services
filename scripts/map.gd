@@ -1,5 +1,6 @@
 extends Node2D
 @onready var tilemap: TileMapLayer = $TileMapLayer
+@onready var unit_manager = get_tree().get_first_node_in_group("unit_manager")
 
 var debug_start_tile: Vector2i = Vector2i(-1, -1)
 var debug_end_tile: Vector2i = Vector2i(-1, -1)
@@ -46,6 +47,8 @@ func is_tile_walkable(tile_pos: Vector2i) -> bool:
 var astar := AStarGrid2D.new()
 
 func _ready():
+	if unit_manager:
+		unit_manager.active_unit_changed.connect(_on_active_unit_changed)
 	astar.cell_size = tilemap.tile_set.tile_size # for visualization later
 	astar.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
 
@@ -90,6 +93,13 @@ func _draw():
 			Rect2(world_pos - Vector2(16, 16), Vector2(32, 32)),
 			Color(0.085, 0.323, 1.0, 1.0)
 		)
+
+func _on_active_unit_changed(unit):
+	if unit == null:
+		# Clear all selection-related visuals
+		reachable_tiles.clear()
+		debug_path.clear() # or path_preview if renamed later
+		queue_redraw()
 
 func travel_on_path():
 	pass
