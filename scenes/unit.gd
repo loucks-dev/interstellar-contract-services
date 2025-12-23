@@ -1,6 +1,5 @@
 extends Node2D
 
-
 signal unit_selected(unit)
 signal unit_died(unit)
 
@@ -10,11 +9,14 @@ enum faction { PLAYER, ENEMY }
 @export var move_range := 6
 @export var max_action_points := 2
 @export var unit_faction: faction = faction.PLAYER
+@export var tile_pos: Vector2i
+
 
 var current_hp := max_hp
 var action_points := max_action_points
 var is_alive := true
 var is_selected := false
+var is_moving := false
 
 func _ready():
 	var unit_manager = get_tree().get_first_node_in_group("unit_manager")
@@ -40,6 +42,28 @@ func _on_area_2d_input_event(viewport, event, shape_idx): # move to unitmanager 
 	if event is InputEventMouseButton and event.pressed:
 		emit_signal("unit_selected", self)
 		
+
+func move_along_path(path: Array[Vector2i]) -> void:
+	is_moving = true
+	for i in range(1, path.size()):
+		await move_to_tile_animated(path[i])
+	is_moving = false
+
+
+func move_to_tile_animated(tile: Vector2i) -> void:
+	var map: Node2D = get_tree().get_first_node_in_group("map")
+	tile_pos = tile
+	var target: Vector2 = map.tile_to_world(tile)
+
+	var tween := create_tween()
+	tween.tween_property(self, "position", target, 0.15)
+	await tween.finished
+
+func spend_movement(cost: int) -> void:
+	action_points -= cost
+	action_points = max(action_points, 0)
+	print("Movement taken, new AP:", action_points)
+
 func take_damage(amount: int):
 	current_hp -= amount
 	if current_hp <= 0:

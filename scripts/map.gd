@@ -6,13 +6,17 @@ var debug_start_tile: Vector2i = Vector2i(-1, -1)
 var debug_end_tile: Vector2i = Vector2i(-1, -1)
 var debug_path: Array[Vector2i] = []
 
+var hover_tile: Vector2i = Vector2i(-1, -1)
+var preview_path: Array[Vector2i] = []
+
 func world_to_tile(world_pos: Vector2) -> Vector2i:
 	return tilemap.local_to_map(tilemap.to_local(world_pos))
 
-func tile_to_world(tile_pos: Vector2i) -> Vector2:
-	return tilemap.to_global(tilemap.map_to_local(tile_pos))
+func tile_to_world(tile: Vector2i) -> Vector2:
+	return tilemap.map_to_local(tile)
 
-# DEBUG - remove later
+
+# DEBUG
 # change for this: if unit_selected = true
 func _input(event):
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
@@ -43,10 +47,12 @@ func is_tile_walkable(tile_pos: Vector2i) -> bool:
 		return false
 	return tile_data.get_custom_data("walkable") == true
 
-# AStarGrid2D 
 var astar := AStarGrid2D.new()
 
 func _ready():
+	print("TileMap pos:", tilemap.position)
+	print("Map pos:", position)
+
 	if unit_manager:
 		unit_manager.active_unit_changed.connect(_on_active_unit_changed)
 	astar.cell_size = tilemap.tile_set.tile_size # for visualization later
@@ -86,13 +92,16 @@ func get_reachable_tiles(from_tile: Vector2i, max_cost: int) -> Array[Vector2i]:
 var reachable_tiles: Array[Vector2i] = []
 
 func _draw():
-	print("Map _draw called, reachable:", reachable_tiles.size())
 	for tile in reachable_tiles:
-		var world_pos = tile_to_world(tile)
+		var center := tile_to_world(tile)
 		draw_rect(
-			Rect2(world_pos - Vector2(16, 16), Vector2(32, 32)),
-			Color(0.085, 0.323, 1.0, 1.0)
+			Rect2(center - Vector2(8, 8), Vector2(16, 16)),
+			Color(0.086, 0.322, 1.0, 0.396)
 		)
+
+	for tile in preview_path:
+		var center := tile_to_world(tile)
+		draw_circle(center, 6, Color(1, 1, 0, 0.8))
 
 func _on_active_unit_changed(unit):
 	if unit == null:
@@ -100,6 +109,58 @@ func _on_active_unit_changed(unit):
 		reachable_tiles.clear()
 		debug_path.clear() # or path_preview if renamed later
 		queue_redraw()
-
-func travel_on_path():
 	pass
+
+func _process(_delta):
+	var unit_manager = get_tree().get_first_node_in_group("unit_manager")
+	if unit_manager == null or unit_manager.active_unit == null:
+		return
+	if unit_manager.active_unit.is_moving:
+		return
+	var mouse_world := get_global_mouse_position()
+	var tile := world_to_tile(mouse_world)
+
+	if tile == hover_tile:
+		return
+
+	hover_tile = tile
+
+	# Only preview paths inside reachable area
+	if tile in reachable_tiles:
+		var unit_tile = world_to_tile(unit_manager.active_unit.global_position)
+		preview_path = find_path(unit_tile, tile)
+	else:
+		preview_path.clear()
+
+	queue_redraw()
+
+func _unhandled_input(event):
+	if event is InputEventMouseButton \
+	and event.button_index == MOUSE_BUTTON_LEFT \
+	and event.pressed:
+		
+		if preview_path.is_empty():
+			return
+
+		var unit = unit_manager.active_unit
+		if unit == null:
+			return
+
+		if unit.action_points <= 0:
+			print("Insufficient AP, cannot move!")
+			return
+
+		# await movement
+		await unit.move_along_path(preview_path)
+
+		# spend movement AFTER animation
+		unit.spend_movement(1)
+		
+		# deselect unit (optional, unsure yet if want(i.e action after move))
+		unit.set_selected(false)
+		unit_manager.active_unit = null
+
+		# Clear visuals
+		preview_path.clear()
+		reachable_tiles.clear()
+		queue_redraw()

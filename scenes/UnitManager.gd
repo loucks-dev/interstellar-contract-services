@@ -30,7 +30,7 @@ func _on_unit_selected(unit) -> void:
 		active_unit.set_selected(false)
 	active_unit = unit
 	active_unit.set_selected(true)
-	
+
 	var map = get_tree().get_first_node_in_group("map")
 	
 	if map:

@@ -8,13 +8,10 @@ signal turn_ended(phase)
 var current_phase: int = phase.PLAYER
 var player_units: Array = []
 
-
 func _ready():
 	var unit_manager = get_tree().get_first_node_in_group("unit_manager") # grab player units from UnitManager
 	if unit_manager:
 		player_units = unit_manager.units
-	
-
 
 func start_player_turn():
 	current_phase = phase.PLAYER
@@ -24,7 +21,6 @@ func start_player_turn():
 		unit.start_turn()
 		
 	emit_signal("turn_started", current_phase)
-	
 
 func end_player_turn():
 	print (" PLAYER TURN END. ")
@@ -35,8 +31,7 @@ func end_player_turn():
 	
 	emit_signal("turn_ended", current_phase)
 	enemy_turn()
-	
-	
+
 func enemy_turn(): # placeholder
 	current_phase = phase.ENEMY
 	print(" ENEMY TURN START. ")

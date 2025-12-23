@@ -1,6 +1,5 @@
 extends Node
 
-
 func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.physical_keycode == KEY_ESCAPE:
