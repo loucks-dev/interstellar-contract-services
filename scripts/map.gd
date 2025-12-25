@@ -133,9 +133,7 @@ func _draw():
 func _on_active_unit_changed(unit):
 	if unit == null:
 		# Clear all selection-related visuals
-		reachable_tiles.clear()
-		preview_path.clear()
-		queue_redraw()
+		clear_action_state()
 	pass
 
 func _process(_delta):
