@@ -1,3 +1,4 @@
+class_name Unit
 extends Node2D
 
 signal unit_selected(unit)
@@ -10,7 +11,7 @@ enum faction { PLAYER, ENEMY }
 @export var max_action_points := 2
 @export var unit_faction: faction = faction.PLAYER
 @export var tile_pos: Vector2i
-
+@export var unit_sprite: Texture2D
 
 var current_hp := max_hp
 var action_points := max_action_points
@@ -19,9 +20,16 @@ var is_selected := false
 var is_moving := false
 
 func _ready():
+	$Sprite2D.texture = unit_sprite
 	var unit_manager = get_tree().get_first_node_in_group("unit_manager")
 	if unit_manager:
 		unit_manager.register_unit(self)
+
+	# Wait one frame for map to exist
+	await get_tree().process_frame
+	var map = get_tree().get_first_node_in_group("map")
+	if map != null:
+		tile_pos = map.world_to_tile(global_position)
 
 func start_turn():
 	action_points = max_action_points
@@ -42,13 +50,11 @@ func _on_area_2d_input_event(viewport, event, shape_idx): # move to unitmanager 
 	if event is InputEventMouseButton and event.pressed:
 		emit_signal("unit_selected", self)
 		
-
 func move_along_path(path: Array[Vector2i]) -> void:
 	is_moving = true
 	for i in range(1, path.size()):
 		await move_to_tile_animated(path[i])
 	is_moving = false
-
 
 func move_to_tile_animated(tile: Vector2i) -> void:
 	var map: Node2D = get_tree().get_first_node_in_group("map")

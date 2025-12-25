@@ -35,7 +35,7 @@ func _on_unit_selected(unit) -> void:
 	
 	if map:
 		var tile = map.world_to_tile(unit.global_position)
-		map.reachable_tiles = map.get_reachable_tiles(tile, unit.move_range)
+		map.reachable_tiles = map.get_reachable_tiles(tile, unit.move_range, unit)
 		map.queue_redraw()
 	else:
 		print("ERROR: MAP NOT FOUND")
@@ -49,3 +49,9 @@ func deselect_active_unit():
 		active_unit = null
 		emit_signal("active_unit_changed", null)
 		print("Active unit cleared")
+
+func get_unit_at_tile(tile: Vector2i):
+	for unit in units:
+		if unit.tile_pos == tile and unit.is_alive:
+			return unit
+	return null

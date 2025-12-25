@@ -7,6 +7,7 @@ var debug_end_tile: Vector2i = Vector2i(-1, -1)
 var debug_path: Array[Vector2i] = []
 
 var hover_tile: Vector2i = Vector2i(-1, -1)
+var hover_target = null
 var preview_path: Array[Vector2i] = []
 
 func world_to_tile(world_pos: Vector2) -> Vector2i:
@@ -32,7 +33,7 @@ func _input(event):
 		# second click = end + pathfind
 		else:
 			debug_end_tile = tile
-			debug_path = find_path(debug_start_tile, debug_end_tile)
+			debug_path = find_path(debug_start_tile, debug_end_tile, unit_manager.active_unit)
 			print("End tile set:", tile)
 			print("Path:", debug_path)
 
@@ -67,28 +68,40 @@ func _ready():
 			var pos = Vector2i(x, y)
 			astar.set_point_solid(pos, not is_tile_walkable(pos))
 
-func find_path(from_tile: Vector2i, to_tile: Vector2i) -> Array[Vector2i]:
-	if astar.is_point_solid(to_tile):
-		return []
-	return astar.get_id_path(from_tile, to_tile)
+func find_path(from_tile: Vector2i, to_tile: Vector2i, mover: Unit) -> Array[Vector2i]:
+	apply_unit_obstacles(mover)
 
-func get_reachable_tiles(from_tile: Vector2i, max_cost: int) -> Array[Vector2i]:
+	var path: Array[Vector2i] = []
+	if not astar.is_point_solid(to_tile):
+		path = astar.get_id_path(from_tile, to_tile)
+
+	clear_unit_obstacles()
+	return path
+
+
+func get_reachable_tiles(from_tile: Vector2i, max_cost: int, mover: Unit) -> Array[Vector2i]:
+	apply_unit_obstacles(mover)
+
 	var reachable: Array[Vector2i] = []
+
 	for x in range(astar.region.position.x, astar.region.position.x + astar.region.size.x):
 		for y in range(astar.region.position.y, astar.region.position.y + astar.region.size.y):
 			var tile := Vector2i(x, y)
+
 			if astar.is_point_solid(tile):
 				continue
 
 			var path := astar.get_id_path(from_tile, tile)
-			if path.size() == 0:
+			if path.is_empty():
 				continue
 
 			var cost := path.size() - 1
 			if cost <= max_cost:
 				reachable.append(tile)
-	
+
+	clear_unit_obstacles()
 	return reachable
+
 var reachable_tiles: Array[Vector2i] = []
 
 func _draw():
@@ -107,28 +120,28 @@ func _on_active_unit_changed(unit):
 	if unit == null:
 		# Clear all selection-related visuals
 		reachable_tiles.clear()
-		debug_path.clear() # or path_preview if renamed later
+		preview_path.clear() 
 		queue_redraw()
 	pass
 
 func _process(_delta):
-	var unit_manager = get_tree().get_first_node_in_group("unit_manager")
-	if unit_manager == null or unit_manager.active_unit == null:
+	var unit = unit_manager.active_unit
+	if unit_manager == null or unit == null:
 		return
-	if unit_manager.active_unit.is_moving:
+	if unit.is_moving:
 		return
-	var mouse_world := get_global_mouse_position()
-	var tile := world_to_tile(mouse_world)
-
+	
+	var tile := world_to_tile(get_global_mouse_position())
 	if tile == hover_tile:
 		return
 
 	hover_tile = tile
-
+	hover_target = unit_manager.get_unit_at_tile(tile)
+	
 	# Only preview paths inside reachable area
-	if tile in reachable_tiles:
-		var unit_tile = world_to_tile(unit_manager.active_unit.global_position)
-		preview_path = find_path(unit_tile, tile)
+	if tile in reachable_tiles and hover_target == null:
+		var unit_tile = world_to_tile(unit.global_position)
+		preview_path = find_path(unit_tile, tile, unit)
 	else:
 		preview_path.clear()
 
@@ -164,3 +177,16 @@ func _unhandled_input(event):
 		preview_path.clear()
 		reachable_tiles.clear()
 		queue_redraw()
+
+func apply_unit_obstacles(except_unit: Unit = null):
+	for unit in unit_manager.units:
+		if not unit.is_alive:
+			continue
+		if unit == except_unit:
+			continue
+
+		astar.set_point_solid(unit.tile_pos, true)
+
+func clear_unit_obstacles():
+	for unit in unit_manager.units:
+		astar.set_point_solid(unit.tile_pos, false)
