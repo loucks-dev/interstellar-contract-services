@@ -11,7 +11,11 @@ func register_unit(unit):
 	print("Registering unit:", unit.name)
 	units.append(unit)
 	unit.unit_selected.connect(_on_unit_selected)
-	
+	unit.unit_died.connect(_on_unit_died)
+
+func _on_unit_died(unit):
+	units.erase(unit)
+
 func _on_unit_selected(unit) -> void:
 	
 	if turn_manager == null:
@@ -21,7 +25,6 @@ func _on_unit_selected(unit) -> void:
 		print("error: not player turn phase")
 		return
 	if unit.unit_faction != unit.faction.PLAYER:
-		print ("error: unit not in player faction")
 		return
 	if active_unit == unit:
 		print ("error: already selected")

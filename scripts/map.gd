@@ -10,6 +10,8 @@ var hover_tile: Vector2i = Vector2i(-1, -1)
 var hover_target = null
 var preview_path: Array[Vector2i] = []
 
+var attack_target: Unit = null
+
 func world_to_tile(world_pos: Vector2) -> Vector2i:
 	return tilemap.local_to_map(tilemap.to_local(world_pos))
 
@@ -19,28 +21,28 @@ func tile_to_world(tile: Vector2i) -> Vector2:
 
 # DEBUG
 # change for this: if unit_selected = true
-func _input(event):
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var world_pos = get_global_mouse_position()
-		var tile = world_to_tile(world_pos)
-
-		# first click = start
-		if debug_start_tile == Vector2i(-1, -1):
-			debug_start_tile = tile
-			print("Start tile set:", tile)
-			debug_path.clear()
-
-		# second click = end + pathfind
-		else:
-			debug_end_tile = tile
-			debug_path = find_path(debug_start_tile, debug_end_tile, unit_manager.active_unit)
-			print("End tile set:", tile)
-			print("Path:", debug_path)
-
-			# reset for next test
-			debug_start_tile = Vector2i(-1, -1)
-
-		queue_redraw()
+# func _input(event):
+	#if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		#var world_pos = get_global_mouse_position()
+		#var tile = world_to_tile(world_pos)
+#
+		## first click = start
+		#if debug_start_tile == Vector2i(-1, -1):
+			#debug_start_tile = tile
+			#print("Start tile set:", tile)
+			#debug_path.clear()
+#
+		## second click = end + pathfind
+		#else:
+			#debug_end_tile = tile
+			#debug_path = find_path(debug_start_tile, debug_end_tile, unit_manager.active_unit)
+			#print("End tile set:", tile)
+			#print("Path:", debug_path)
+#
+			## reset for next test
+			#debug_start_tile = Vector2i(-1, -1)
+#
+		#queue_redraw()
 
 func is_tile_walkable(tile_pos: Vector2i) -> bool:
 	var tile_data = tilemap.get_cell_tile_data(tile_pos)
@@ -105,6 +107,8 @@ func get_reachable_tiles(from_tile: Vector2i, max_cost: int, mover: Unit) -> Arr
 var reachable_tiles: Array[Vector2i] = []
 
 func _draw():
+	
+	# REACHABLE PREVIEW
 	for tile in reachable_tiles:
 		var center := tile_to_world(tile)
 		draw_rect(
@@ -112,15 +116,25 @@ func _draw():
 			Color(0.086, 0.322, 1.0, 0.396)
 		)
 
+	# PATH PREVIEW
 	for tile in preview_path:
 		var center := tile_to_world(tile)
 		draw_circle(center, 6, Color(1, 1, 0, 0.8))
+	
+	# ATTACK PREVIEW
+	if attack_target:
+		draw_circle(
+			attack_target.global_position,
+			18,
+			Color(1.0, 0.2, 0.2, 0.85)
+		)
+
 
 func _on_active_unit_changed(unit):
 	if unit == null:
 		# Clear all selection-related visuals
 		reachable_tiles.clear()
-		preview_path.clear() 
+		preview_path.clear()
 		queue_redraw()
 	pass
 
@@ -137,14 +151,22 @@ func _process(_delta):
 
 	hover_tile = tile
 	hover_target = unit_manager.get_unit_at_tile(tile)
-	
-	# Only preview paths inside reachable area
-	if tile in reachable_tiles and hover_target == null:
+	attack_target = null
+	preview_path.clear()
+
+	# ATTACK PREVIEW
+	if hover_target != null \
+	and hover_target.unit_faction != unit.unit_faction \
+	and is_target_in_attack_range(unit, hover_target):
+		print("Target found successfully")
+		attack_target = hover_target
+		
+	# MOVEMENT PREVIEW
+	elif tile in reachable_tiles:
 		var unit_tile = world_to_tile(unit.global_position)
 		preview_path = find_path(unit_tile, tile, unit)
-	else:
-		preview_path.clear()
-
+	
+	# DEBUG print("Hover: ", hover_target, "Attack target: ", attack_target) 
 	queue_redraw()
 
 func _unhandled_input(event):
@@ -152,10 +174,24 @@ func _unhandled_input(event):
 	and event.button_index == MOUSE_BUTTON_LEFT \
 	and event.pressed:
 		
+		var unit = unit_manager.active_unit
+		if unit == null or unit.action_points <= 0:
+			return
+
+		# ATTACK
+		if attack_target:
+			unit.execute_attack(unit, attack_target)
+			clear_action_state()
+			return
+
+		# MOVE
 		if preview_path.is_empty():
 			return
 
-		var unit = unit_manager.active_unit
+		await unit.move_along_path(preview_path)
+		unit.spend_movement(1)
+		clear_action_state()
+
 		if unit == null:
 			return
 
@@ -174,9 +210,7 @@ func _unhandled_input(event):
 		unit_manager.active_unit = null
 
 		# Clear visuals
-		preview_path.clear()
-		reachable_tiles.clear()
-		queue_redraw()
+		clear_action_state()
 
 func apply_unit_obstacles(except_unit: Unit = null):
 	for unit in unit_manager.units:
@@ -190,3 +224,12 @@ func apply_unit_obstacles(except_unit: Unit = null):
 func clear_unit_obstacles():
 	for unit in unit_manager.units:
 		astar.set_point_solid(unit.tile_pos, false)
+
+func clear_action_state():
+	preview_path.clear()
+	reachable_tiles.clear()
+	attack_target = null
+	queue_redraw()
+
+func is_target_in_attack_range(attacker: Unit, target: Unit) -> bool:
+	return attacker.tile_pos.distance_to(target.tile_pos) <= 5

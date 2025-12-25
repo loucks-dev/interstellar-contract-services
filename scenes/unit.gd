@@ -20,8 +20,8 @@ var is_selected := false
 var is_moving := false
 
 func _ready():
-	$Sprite2D.texture = unit_sprite
 	var unit_manager = get_tree().get_first_node_in_group("unit_manager")
+	$Sprite2D.texture = unit_sprite
 	if unit_manager:
 		unit_manager.register_unit(self)
 
@@ -70,6 +70,13 @@ func spend_movement(cost: int) -> void:
 	action_points = max(action_points, 0)
 	print("Movement taken, new AP:", action_points)
 
+func execute_attack(attacker: Unit, target: Unit):
+	var unit_manager = get_tree().get_first_node_in_group("unit_manager")
+	print(attacker.name, "attacks", target.name)
+	attacker.action_points -= 1
+	target.take_damage(3)
+	unit_manager.deselect_active_unit()
+
 func take_damage(amount: int):
 	current_hp -= amount
 	if current_hp <= 0:
@@ -78,5 +85,6 @@ func take_damage(amount: int):
 func die():
 	is_alive = false
 	emit_signal ("unit_died", self)
+	print("Unit died.")
 	queue_free()
 	
