@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=4 uid="uid://upc8ed66t3qt"]
+[gd_scene load_steps=10 format=4 uid="uid://upc8ed66t3qt"]
 
 [ext_resource type="Script" uid="uid://bkq67ka6v5gql" path="res://scripts/map.gd" id="1_xkm8s"]
 [ext_resource type="Texture2D" uid="uid://di0x2ldluyl1" path="res://data/sprites/floor-debug.png" id="2_tm3qm"]
@@ -15,18 +15,15 @@ texture = ExtResource("2_tm3qm")
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_inly4"]
 texture = ExtResource("3_yyirk")
 0:0/0 = 0
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tm3qm"]
-texture = ExtResource("2_tm3qm")
-0:0/0 = 0
-0:0/0/custom_data_0 = true
+0:0/0/custom_data_1 = 2
 
 [sub_resource type="TileSet" id="TileSet_7ctrk"]
 custom_data_layer_0/name = "walkable"
 custom_data_layer_0/type = 1
+custom_data_layer_1/name = "cover"
+custom_data_layer_1/type = 2
 sources/0 = SubResource("TileSetAtlasSource_41ykk")
 sources/1 = SubResource("TileSetAtlasSource_inly4")
-sources/2 = SubResource("TileSetAtlasSource_tm3qm")
 
 [node name="Map" type="Node2D" groups=["map"]]
 script = ExtResource("1_xkm8s")
